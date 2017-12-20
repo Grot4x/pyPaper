@@ -41,9 +41,6 @@ def newImage():
         with open(newname, 'wb') as f:
                 r.raw.decode_content = True
                 shutil.copyfileobj(r.raw, f)
-                print(DEFAULT_CONFIG["CURRENT_COUNT"])
-                DEFAULT_CONFIG["CURRENT_COUNT"] = ((DEFAULT_CONFIG["CURRENT_COUNT"] + 1)
-                                                   % (DEFAULT_CONFIG["MAX_COUNT"] + 1))
 
 
 def main():
@@ -59,19 +56,20 @@ def main():
         f = open(CONFIG_PATH, 'w').close()
     # load a new Image
     newImage()
-    # write config
-    f = open(CONFIG_PATH, 'w')
-    f.write(json.dumps(DEFAULT_CONFIG, indent=4))
-    image = "file://"+DEFAULT_CONFIG["BASE_PATH"]+"/"+str(DEFAULT_CONFIG["CURRENT_COUNT"]-1)+".jpg"
+    image = "file://"+DEFAULT_CONFIG["BASE_PATH"]+"/"+str(DEFAULT_CONFIG["CURRENT_COUNT"])+".jpg"
     # try to set wallpaper
     if os.name == 'posix':
         print("Detected posix system going to set wallpaper")
         command = "gsettings set org.gnome.desktop.background picture-uri %s" % (image)
         os.system(command)
-    # if os.name == 'nt':
-    #     print("Detected Windows going to set wallpaper")
-    #     SPI_SETDESKWALLPAPER = 20
-    #     ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, image, 0)
+        print("Current wallpaper is: " + image)
+    else:
+        print("No posix OS " + os.name)
+        print("Wallpaper is here: " + image)
+    # write config and counter + 1
+    DEFAULT_CONFIG["CURRENT_COUNT"] = ((DEFAULT_CONFIG["CURRENT_COUNT"] + 1) % (DEFAULT_CONFIG["MAX_COUNT"] + 1))
+    f = open(CONFIG_PATH, 'w')
+    f.write(json.dumps(DEFAULT_CONFIG, indent=4))
 
 
 if __name__ == '__main__':
